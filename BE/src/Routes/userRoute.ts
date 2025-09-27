@@ -1,6 +1,7 @@
 import express from 'express';
 export const userRouter=express.Router();
+import { Signin,Signup } from '../controllers/userController';
 
-userRouter.post('/signup',);
+userRouter.post('/signup',Signup);
 
-userRouter.post('/signin',);
+userRouter.post('/signin',Signin);
