@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+
 import { Schema } from 'mongoose';
 dotenv.config();
 
@@ -42,6 +43,5 @@ export const TokenCreation =(Id:Schema.Types.ObjectId)=>{
     );
     return token;
 }
-
 
 

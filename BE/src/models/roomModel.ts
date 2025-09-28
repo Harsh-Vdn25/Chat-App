@@ -44,16 +44,18 @@ export const getRoom = async (roomName: string) => {
   }
 };
 
-export const checkUser = async (userId: string | null) => {
-  if (!userId) {
+export const checkUser = async (userId: string | null,roomName:string|null) => {
+  if (!userId||!roomName) {
     return false;
   }
   try {
-    const isValidated = await RoomModel.findOne({
+    const isAuthorized = await RoomModel.findOne({
+      roomName:roomName,
       members: new mongoose.Types.ObjectId(userId),
     });
 
-    return !!isValidated;
+    return !!isAuthorized;
+    
   } catch (err) {
     console.error(err);
     return false;

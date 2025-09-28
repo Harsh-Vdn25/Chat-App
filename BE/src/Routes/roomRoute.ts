@@ -9,7 +9,8 @@ import {
     joinRoom
 } from '../controllers/roomController';
 
-import { verifyToken,checkRoom } from '../middleware/roommiddleware';
+import { verifyToken } from '../middleware/auth';
+import { checkRoom,checkRoomType } from '../middleware/room';
 
 roomRouter.get('/getRooms',verifyToken,getRooms);
 
@@ -19,4 +20,4 @@ roomRouter.get('/chats',verifyToken,checkRoom,getChats);
 
 roomRouter.post('/create',verifyToken,createRoom);//check if room is already available 
 
-roomRouter.post('/join',verifyToken,checkRoom,joinRoom)
+roomRouter.post('/join',verifyToken,checkRoom,checkRoomType,joinRoom)
