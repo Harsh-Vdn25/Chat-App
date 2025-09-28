@@ -8,13 +8,26 @@ interface ConfigType{
     MONGO_URL:string;
     JWT_SECRET:string;
     SALT_ROUNDS:string;
+    SOCKET_PORT:string;
 }
 
+
+const getRequired=(input:string):string=>{
+  const value=process.env[input];
+  if(!value){
+    throw new Error("No Value");
+  }
+  return value;
+}
+
+
+
 export const requiredInfo:ConfigType={
-    PORT:process.env.PORT||'',
-    MONGO_URL:process.env.MONGO_URL||'',
-    JWT_SECRET:process.env.JWT_SECRET||'',
-    SALT_ROUNDS:process.env.SALT_ROUNDS||''
+    PORT:getRequired('PORT'),
+    MONGO_URL:getRequired('MONGO_URL'),
+    JWT_SECRET:getRequired('JWT_SECRET'),
+    SALT_ROUNDS:getRequired('SALT_ROUNDS'),
+    SOCKET_PORT:getRequired('SOCKET_PORT')
 }
 
 
@@ -29,3 +42,6 @@ export const TokenCreation =(Id:Schema.Types.ObjectId)=>{
     );
     return token;
 }
+
+
+

@@ -3,6 +3,7 @@ require("dotenv").config();
 import cors from 'cors';
 
 import { userRouter } from './Routes/userRoute';
+import { roomRouter } from './Routes/roomRoute';
 import { ConnectDB } from './config/db';
 import { requiredInfo } from './config/utils';
 
@@ -16,7 +17,7 @@ app.use(express.json());
 
 //Routes
 app.use('/api/v1/user',userRouter);
-
+app.use('/api/v1/room',roomRouter);
 
 const port:number =parseInt(requiredInfo.PORT);
 if(isNaN(port)){

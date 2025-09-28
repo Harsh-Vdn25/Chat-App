@@ -15,11 +15,47 @@ const RoomSchema = new Schema<RoomType>(
     capacity: Number,
     createdBy: { type: Schema.Types.ObjectId, ref: "user" },
     isPrivate: { type: Boolean, default: false },
-    members: [{type: Schema.Types.ObjectId, ref: "user" }],
-  },
+    members: [{ type: Schema.Types.ObjectId, ref: "user" }],
+},
   {
     timestamps: true,
   }
 );
 
 export const RoomModel = mongoose.model("room", RoomSchema);
+
+export const getRoom = async (roomName: string) => {
+  if (!roomName) {
+    console.log("No roomName given");
+    return;
+  }
+  try {
+    const response = await RoomModel.findOne({
+      roomName: roomName,
+    });
+    if (!response) {
+      console.log("Room with given name doesn't exist");
+      return;
+    }
+    console.log(response);
+    return response;
+  } catch (err) {
+    console.log("Failed to fetch the room Details");
+  }
+};
+
+export const checkUser = async (userId: string | null) => {
+  if (!userId) {
+    return false;
+  }
+  try {
+    const isValidated = await RoomModel.findOne({
+      members: new mongoose.Types.ObjectId(userId),
+    });
+
+    return !!isValidated;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+};
