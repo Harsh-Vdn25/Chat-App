@@ -4,7 +4,17 @@ import { PrivateRoomModel } from '../models/PrivateRoomModel';
 import { hashPassword } from '../helper/hashPassword';
 
 export async function getRooms(req:Request,res:Response){
-    //get all the rooms
+    try{
+        const response=await RoomModel.find({
+            isPrivate:false
+        });
+        if(!response){
+            return res.status(400).json({message:"No Chat rooms available"});
+        }
+        res.status(200).json(response);
+    }catch(err){
+        res.status(500).json({message:"Error at the server side"});
+    }
 }
 
 
@@ -13,33 +23,18 @@ export async function getRoomInfo(req:Request,res:Response){
 }
 
 
-
-export async function joinRoom(req: Request, res: Response) {
-    const { roomName } = req.body;
-    const userId = (req as any).userId;
-
-    try {
-        const response = await RoomModel.updateOne(
-            { roomName },
-            { $push: { members: userId } }
-        );
-
-        if (response.modifiedCount === 0) {
-            return res.status(400).json({ message: "Failed to join the room" });
-        }
-
-        return res.status(200).json({ message: "Successfully joined the room" });
-    } catch (err) {
-        console.error("Failed to join the room", err);
-        return res.status(500).json({ message: "Internal server error" });
-    }
-}
-
-
-
 export async function getChats(req:Request,res:Response){
     //Get the chats of that room 
-    console.log("getChats")
+    const userId=(req as any ).userId;
+    const roomId=req.params.roomId;
+    try{
+        const response=await RoomModel.findOne({
+            roomId:roomId,
+            members:userId
+        })
+    }catch(err){
+        res.status(500).json({message:"Error at the server side"});
+    }
 }
 
 export async function createRoom(req:Request,res:Response){

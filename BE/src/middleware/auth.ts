@@ -13,13 +13,13 @@ export  function verifyToken(req: Request, res: Response, next: NextFunction){
   if(!Token){
     return res.json("No Token");
   }
-  console.log(Token);
+  
   const decoded=jwt.verify(Token,requiredInfo.JWT_SECRET) as TokenType;
   if(!decoded){
     console.log("Not authorized");
     return;
   }
-  console.log("decoded",decoded);
+  
   (req as any).userId=decoded.id;
   next();
 }

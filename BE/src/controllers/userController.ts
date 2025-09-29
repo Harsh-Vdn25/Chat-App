@@ -13,7 +13,7 @@ const JWT_SECRET=requiredInfo.JWT_SECRET;
 
 export const Signup = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
-  console.log(username);
+  
   try {
     const ExistingUser = await getUserByName(username);
     if (ExistingUser) {
