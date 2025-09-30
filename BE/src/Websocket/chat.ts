@@ -8,7 +8,8 @@ const allSockets = new Map<string, WebSocket[]>();
 
 export interface messageType {
   type: "join" | "chat";
-  roomName: string;
+  roomName?: string;
+  message?: string;
   token?: string;
 }
 
@@ -26,12 +27,14 @@ export const connectWebSocket = (server: Server) => {
       }
       //for joining
       if (messageInfo.type === "join") {
-        if (!messageInfo.token) {
-          socket.send(JSON.stringify({ message: "No Token" }));
+        if (!messageInfo.token || !messageInfo.roomName) {
+          socket.send(
+            JSON.stringify({ message: "Please give appropriate information" })
+          );
           return;
         }
         const userId = decodeToken(messageInfo.token);
-        
+
         if (allSockets.get(messageInfo.roomName)) {
           try {
             //private roomCheck  ignored for now
@@ -66,6 +69,17 @@ export const connectWebSocket = (server: Server) => {
             socket.send(JSON.stringify({ error: err }));
           }
         }
+      }
+      //chat logic
+      if (messageInfo.type === "chat") {  
+        if(!messageInfo.message){
+            socket.send(JSON.stringify("message field is blank"));
+          }
+          allSockets.forEach((sockets)=>{
+            if(sockets.includes(socket)){
+              sockets.map(s=>s.send(JSON.stringify(messageInfo.message)))
+            }
+          })
       }
     });
 
