@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { RoomModel } from '../models/roomModel';
 import { requiredInfo } from '../config/utils';
 
-interface TokenType extends JwtPayload{
+export interface TokenType extends JwtPayload{
   id:string
 }
 

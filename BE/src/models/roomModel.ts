@@ -34,13 +34,12 @@ export const getRoom = async (roomName: string) => {
       roomName: roomName,
     });
     if (!response) {
-      console.log("Room with given name doesn't exist");
-      return;
+      return "";
     }
-    console.log(response);
     return response;
   } catch (err) {
     console.log("Failed to fetch the room Details");
+    return '';
   }
 };
 

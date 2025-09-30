@@ -9,7 +9,6 @@ interface ConfigType{
     MONGO_URL:string;
     JWT_SECRET:string;
     SALT_ROUNDS:string;
-    SOCKET_PORT:string;
 }
 
 
@@ -28,7 +27,6 @@ export const requiredInfo:ConfigType={
     MONGO_URL:getRequired('MONGO_URL'),
     JWT_SECRET:getRequired('JWT_SECRET'),
     SALT_ROUNDS:getRequired('SALT_ROUNDS'),
-    SOCKET_PORT:getRequired('SOCKET_PORT')
 }
 
 

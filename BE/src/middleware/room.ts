@@ -1,7 +1,6 @@
 import {Request,Response,NextFunction} from 'express';
-import bcrypt from 'bcrypt';
-import { RoomModel,checkUser } from '../models/roomModel';
-import { PrivateRoomModel } from '../models/PrivateRoomModel';
+import { RoomModel } from '../models/roomModel';
+
 
 export async function checkRoom(req: Request, res: Response, next: NextFunction) {
   const { roomName } = req.body;
