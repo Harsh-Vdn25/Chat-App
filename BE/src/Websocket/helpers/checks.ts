@@ -31,6 +31,5 @@ export const decodeToken=(token:string)=>{
   if(!userInfo){
     return '';
   }
-  console.log(userInfo);
   return userInfo.id;
 }

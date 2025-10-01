@@ -1,10 +1,14 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
-import { CheckRequest, decodeToken } from "./utils/checks";
+import { CheckRequest, decodeToken } from "./helpers/checks";
 import { RoomModel } from "../models/roomModel";
 import { TokenType } from "../middleware/auth";
+import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 
-const allSockets = new Map<string, WebSocket[]>();
+export interface SocketArrType {
+  socket: WebSocket;
+  userId: string;
+}
 
 export interface messageType {
   type: "join" | "chat";
@@ -12,6 +16,8 @@ export interface messageType {
   message?: string;
   token?: string;
 }
+
+export const allSockets = new Map<string, SocketArrType[]>();
 
 export const connectWebSocket = (server: Server) => {
   const wss = new WebSocketServer({ server });
@@ -38,8 +44,12 @@ export const connectWebSocket = (server: Server) => {
         if (allSockets.get(messageInfo.roomName)) {
           try {
             //private roomCheck  ignored for now
-            allSockets.get(messageInfo.roomName)?.push(socket);
-
+            if (checkDuplicateSockets(socket, messageInfo.roomName,messageInfo.token)) {
+              return;
+            }
+            allSockets
+              .get(messageInfo.roomName)
+              ?.push({ socket: socket, userId: userId });
             socket.send(
               JSON.stringify({ message: "Successfully added to the room" })
             );
@@ -52,7 +62,10 @@ export const connectWebSocket = (server: Server) => {
             if (Object.keys(roomInfo).length === 0) {
               return;
             }
-            allSockets.set(messageInfo.roomName, [socket]);
+            allSockets.set(messageInfo.roomName, [{ socket, userId }]);
+            socket.send(
+              JSON.stringify({ message: "Successfully added to the room" })
+            );
           } catch (err) {}
         }
         if (allSockets.has(messageInfo.roomName)) {
@@ -71,19 +84,24 @@ export const connectWebSocket = (server: Server) => {
         }
       }
       //chat logic
-      if (messageInfo.type === "chat") {  
-        if(!messageInfo.message){
-            socket.send(JSON.stringify("message field is blank"));
-          }
-          allSockets.forEach((sockets)=>{
-            if(sockets.includes(socket)){
-              sockets.map(s=>s.send(JSON.stringify(messageInfo.message)))
-            }
-          })
+      if (messageInfo.type === "chat") {
+        if (!messageInfo.message) {
+          socket.send(JSON.stringify("message field is blank"));
+        }
+        allSockets.forEach((sockets) => {
+          sockets.map((sObj) =>
+            sObj.socket.send(JSON.stringify(messageInfo.message))
+          );
+        });
       }
     });
 
     // Handle close
-    socket.on("close", () => {});
+    socket.on("close", () => {
+      allSockets.forEach((sockets, roomName) => {
+        const remaniningSockets = sockets.filter((s) => s.socket !== socket);
+        allSockets.set(roomName, remaniningSockets);
+      });
+    });
   });
 };
