@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import { getRoom } from "../../models/roomModel";
-import jwt,{ JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { requiredInfo } from "../../config/utils";
 import { TokenType } from "../../middleware/auth";
 
