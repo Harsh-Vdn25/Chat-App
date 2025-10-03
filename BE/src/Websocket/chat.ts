@@ -1,11 +1,11 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
-import {z} from 'zod';
+import { z } from "zod";
 import { CheckRequest, decodeToken } from "./helpers/checks";
 import { RoomModel } from "../models/roomModel";
 import { TokenType } from "../middleware/auth";
 import { checkDuplicateSockets } from "./helpers/handleDuplicates";
-import { checkIpRequest,joinType,chatType} from "./helpers/inputValidate";
+import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
 
 export interface SocketArrType {
   socket: WebSocket;
@@ -19,26 +19,24 @@ export const connectWebSocket = (server: Server) => {
 
   wss.on("connection", async (socket) => {
     socket.on("message", async (message) => {
-      const parsed=checkIpRequest(socket,message);
+      const parsed = checkIpRequest(socket, message);
 
-      if(!parsed||!parsed.success){
+      if (!parsed || !parsed.success) {
         return;
       }
-      const {type}=parsed.data;
+      const { type } = parsed.data;
       //for joining
       if (type === "join") {
-        const joinData=<joinType>parsed.data;
-        const {roomName,token}=joinData;
+        const joinData = <joinType>parsed.data;
+        const { roomName, token } = joinData;
         const userId = decodeToken(token);
 
         if (allSockets.get(roomName)) {
           try {
-            if (checkDuplicateSockets(socket, roomName,token)) {
+            if (checkDuplicateSockets(socket, roomName, token)) {
               return;
             }
-            allSockets
-              .get(roomName)
-              ?.push({ socket: socket, userId: userId });
+            allSockets.get(roomName)?.push({ socket: socket, userId: userId });
             socket.send(
               JSON.stringify({ message: "Successfully added to the room" })
             );
@@ -56,9 +54,7 @@ export const connectWebSocket = (server: Server) => {
               JSON.stringify({ message: "Successfully added to the room" })
             );
           } catch (err) {
-            socket.send(
-              JSON.stringify({message:"Failed to add "})
-            )
+            socket.send(JSON.stringify({ message: "Failed to add " }));
           }
         }
         if (allSockets.has(roomName)) {
@@ -78,14 +74,14 @@ export const connectWebSocket = (server: Server) => {
       }
       //chat logic
       if (type === "chat") {
-        const chatData=<chatType>parsed.data;
-        const {message}=chatData;
+        const chatData = <chatType>parsed.data;
+        const { message } = chatData;
         allSockets.forEach((sockets) => {
-          sockets.map((sObj) =>
-            sObj.socket.send(JSON.stringify({
-              message:message
-            }))
-          );
+          if (sockets.some((sObj) => sObj.socket === socket)) {
+            sockets.forEach((sObj) => {
+              sObj.socket.send(JSON.stringify({ message }));
+            });
+          }
         });
       }
     });
