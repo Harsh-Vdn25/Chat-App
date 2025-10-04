@@ -50,7 +50,7 @@ export const checkUser = async (userId: string | null,roomName:string|null) => {
   try {
     const isAuthorized = await RoomModel.findOne({
       roomName:roomName,
-      members: new mongoose.Types.ObjectId(userId),
+      members: new mongoose.Types.ObjectId(userId)
     });
 
     return !!isAuthorized;
@@ -58,5 +58,20 @@ export const checkUser = async (userId: string | null,roomName:string|null) => {
   } catch (err) {
     console.error(err);
     return false;
+  }
+};
+
+export const AddUser = async(roomName:string,userId:string) => {
+  try {
+    const addedUser = await RoomModel.updateOne(
+      {
+        roomName: roomName,
+      },
+      {
+        $addToSet: { members: userId },
+      }
+    );
+  } catch (err) {
+    console.log(err);
   }
 };

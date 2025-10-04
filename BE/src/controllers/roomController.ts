@@ -5,9 +5,7 @@ import { hashPassword } from "../helper/hashPassword";
 
 export async function getRooms(req: Request, res: Response) {
   try {
-    const response = await RoomModel.find({
-      isPrivate: false,
-    });
+    const response = await RoomModel.find();
     if (!response) {
       return res.status(400).json({ message: "No Chat rooms available" });
     }

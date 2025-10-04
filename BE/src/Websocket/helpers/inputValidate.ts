@@ -6,12 +6,14 @@ export interface messageType {
   roomName?: string;
   message?: string;
   token?: string;
+  password?:string;
 }
 
 export const joinSchema = z.object({
   type: z.literal('join'),
   roomName: z.string().min(2),
-  token: z.string().min(7)      
+  token: z.string().min(7),
+  password:z.string().optional(),
 });
 
 export const chatSchema = z.object({
