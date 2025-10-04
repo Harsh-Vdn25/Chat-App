@@ -1,11 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
-import { z } from "zod";
 import { CheckRequest, decodeToken } from "./helpers/checks";
-import { RoomModel } from "../models/roomModel";
-import { TokenType } from "../middleware/auth";
-import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
+import {  PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
 
 export interface SocketArrType {
   socket: WebSocket;
@@ -28,49 +25,15 @@ export const connectWebSocket = (server: Server) => {
       //for joining
       if (type === "join") {
         const joinData = <joinType>parsed.data;
-        const { roomName, token } = joinData;
+        const { roomName, token, password } = joinData;
         const userId = decodeToken(token);
+        const roomInfo: any = await CheckRequest(roomName, socket);
 
-        if (allSockets.get(roomName)) {
-          try {
-            if (checkDuplicateSockets(socket, roomName, token)) {
-              return;
-            }
-            allSockets.get(roomName)?.push({ socket: socket, userId: userId });
-            socket.send(
-              JSON.stringify({ message: "Successfully added to the room" })
-            );
-          } catch (err) {
-            socket.send(JSON.stringify({ error: err }));
-          }
-        } else {
-          try {
-            const roomInfo = await CheckRequest(roomName, socket);
-            if (Object.keys(roomInfo).length === 0) {
-              return;
-            }
-            allSockets.set(roomName, [{ socket, userId }]);
-            socket.send(
-              JSON.stringify({ message: "Successfully added to the room" })
-            );
-          } catch (err) {
-            socket.send(JSON.stringify({ message: "Failed to add " }));
-          }
-        }
-        if (allSockets.has(roomName)) {
-          try {
-            const addedUser = await RoomModel.updateOne(
-              {
-                roomName: roomName,
-              },
-              {
-                $addToSet: { members: userId },
-              }
-            );
-          } catch (err) {
-            socket.send(JSON.stringify({ error: err }));
-          }
-        }
+        const isAdded=await PrivateRoomCheck(roomInfo, socket, roomName, userId, password);
+        if(!isAdded){
+            return;
+        }    
+        socket.send(JSON.stringify({message:"Successfully added to the room"}));
       }
       //chat logic
       if (type === "chat") {
@@ -86,7 +49,6 @@ export const connectWebSocket = (server: Server) => {
       }
     });
 
-    // Handle close
     socket.on("close", () => {
       allSockets.forEach((sockets, roomName) => {
         const remaniningSockets = sockets.filter((s) => s.socket !== socket);
