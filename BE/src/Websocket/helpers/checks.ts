@@ -11,11 +11,13 @@ export const CheckRequest = async (roomName: string, socket: WebSocket):Promise<
   }
   try {
     const roomInfo = await getRoom(roomName);
-    if (!roomInfo) {
+    if (!roomInfo||Object.keys(roomInfo).length===0){
       socket.send(JSON.stringify({ error: "Room doesnot exist"}));
       return {};
     }
-    return roomInfo;
+    return {
+      isPrivate:roomInfo.isPrivate,
+    };
   } catch (err) {
     socket.send(JSON.stringify({error:err}));
     return {};

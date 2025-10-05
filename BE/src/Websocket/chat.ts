@@ -3,6 +3,7 @@ import { Server } from "http";
 import { CheckRequest, decodeToken } from "./helpers/checks";
 import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
 import {  PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
+import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 
 export interface SocketArrType {
   socket: WebSocket;
@@ -27,8 +28,15 @@ export const connectWebSocket = (server: Server) => {
         const joinData = <joinType>parsed.data;
         const { roomName, token, password } = joinData;
         const userId = decodeToken(token);
+        if(checkDuplicateSockets(socket,roomName,userId)){
+          return ;
+        }
+        
         const roomInfo: any = await CheckRequest(roomName, socket);
 
+        if(!roomInfo ||Object.keys(roomInfo).length===0){
+          return ;
+        }
         const isAdded=await PrivateRoomCheck(roomInfo, socket, roomName, userId, password);
         if(!isAdded){
             return;
@@ -52,7 +60,12 @@ export const connectWebSocket = (server: Server) => {
     socket.on("close", () => {
       allSockets.forEach((sockets, roomName) => {
         const remaniningSockets = sockets.filter((s) => s.socket !== socket);
-        allSockets.set(roomName, remaniningSockets);
+        //if the room is empty then remove that room also
+        if(remaniningSockets.length===0){
+          return allSockets.delete(roomName)
+        }else{
+            allSockets.set(roomName, remaniningSockets);  
+        }
       });
     });
   });
