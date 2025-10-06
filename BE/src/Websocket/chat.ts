@@ -2,7 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
 import { CheckRequest, decodeToken } from "./helpers/checks";
 import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
-import {  PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
+import { PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
 import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 
 export interface SocketArrType {
@@ -27,33 +27,50 @@ export const connectWebSocket = (server: Server) => {
       if (type === "join") {
         const joinData = <joinType>parsed.data;
         const { roomName, token, password } = joinData;
-        const userId = decodeToken(token);
-        if(checkDuplicateSockets(socket,roomName,userId)){
+        const userId = decodeToken(token,socket);
+        if(!userId){
           return ;
         }
-        
+        if (checkDuplicateSockets(socket, roomName, userId)) {
+          return;
+        }
+
         const roomInfo: any = await CheckRequest(roomName, socket);
 
-        if(!roomInfo ||Object.keys(roomInfo).length===0){
-          return ;
+        if (!roomInfo || Object.keys(roomInfo).length === 0) {
+          return;
         }
-        const isAdded=await PrivateRoomCheck(roomInfo, socket, roomName, userId, password);
-        if(!isAdded){
-            return;
-        }    
-        socket.send(JSON.stringify({message:"Successfully added to the room"}));
+        const isAdded = await PrivateRoomCheck(
+          roomInfo,
+          socket,
+          roomName,
+          userId,
+          password
+        );
+        if (!isAdded) {
+          return;
+        }
+        socket.send(
+          JSON.stringify({ message: "Successfully added to the room" })
+        );
       }
       //chat logic
       if (type === "chat") {
         const chatData = <chatType>parsed.data;
-        const { message } = chatData;
-        allSockets.forEach((sockets) => {
-          if (sockets.some((sObj) => sObj.socket === socket)) {
-            sockets.forEach((sObj) => {
-              sObj.socket.send(JSON.stringify({ message }));
-            });
-          }
-        });
+        const { roomName, message } = chatData;
+        if (!allSockets.has(roomName)) {
+          return socket.send(JSON.stringify({ error: "Room Not Found" }));
+        }
+        const roomSockets = allSockets.get(roomName);
+        if (roomSockets?.some((sObj) => sObj.socket === socket)) {
+          roomSockets.forEach(sObj => {
+            sObj.socket.send(JSON.stringify(message))
+          });;
+          return;
+        }else{
+           socket.send(JSON.stringify({error:"Please join the room"}))
+           return;
+        }
       }
     });
 
@@ -61,10 +78,10 @@ export const connectWebSocket = (server: Server) => {
       allSockets.forEach((sockets, roomName) => {
         const remaniningSockets = sockets.filter((s) => s.socket !== socket);
         //if the room is empty then remove that room also
-        if(remaniningSockets.length===0){
-          return allSockets.delete(roomName)
-        }else{
-            allSockets.set(roomName, remaniningSockets);  
+        if (remaniningSockets.length === 0) {
+          return allSockets.delete(roomName);
+        } else {
+          allSockets.set(roomName, remaniningSockets);
         }
       });
     });

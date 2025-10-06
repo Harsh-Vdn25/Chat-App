@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { passwordCheck } from "../../models/PrivateRoomModel";
-import { allSockets } from "../chat";
 import { AddUser, checkUser } from "../../models/roomModel";
+import { AddSocket } from "./AddSocket";
 
 export const PrivateRoomCheck = async (
   roomInfo: any,
@@ -17,13 +17,7 @@ export const PrivateRoomCheck = async (
     if (!isPresent) {
       await AddUser(roomName, userId);
     }
-    if (allSockets.has(roomName)) {
-      allSockets.get(roomName)?.push({ socket, userId });
-      return true;
-    } else {
-      allSockets.set(roomName, [{ socket, userId }]);
-      return true;
-    }
+    return AddSocket({roomName,socket,userId});
   }
 };
 
@@ -47,13 +41,7 @@ const AddToPrivateRoom = async (
     if (!isPresent){
       AddUser(roomName, userId);
     }
-    if (allSockets.get(roomName)) {
-      allSockets.get(roomName)?.push({ socket, userId });
-      return true;
-    } else {
-      allSockets.set(roomName, [{ socket, userId }]);
-      return true;
-    }
+    return AddSocket({roomName,socket,userId});
   } catch (err) {
     socket.send(JSON.stringify({ error: "Failed to add to the room" }));
     console.log(err);

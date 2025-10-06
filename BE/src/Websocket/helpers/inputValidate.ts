@@ -18,6 +18,7 @@ export const joinSchema = z.object({
 
 export const chatSchema = z.object({
   type: z.literal('chat'),
+  roomName:z.string().min(2),
   message: z.string().min(1)
 });
 
@@ -31,7 +32,7 @@ export type  chatType=z.infer<typeof  chatSchema>;
 
 
 export const checkIpRequest = (socket: WebSocket, message: RawData) => {
-    let messageInfo:messageType;
+    let messageInfo:joinType|chatType;
   try{
     messageInfo= JSON.parse(message.toString());
   }catch(err){
