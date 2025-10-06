@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { passwordCheck } from "../../models/PrivateRoomModel";
-import { allSockets } from "../chat";
 import { AddUser, checkUser } from "../../models/roomModel";
+import { AddSocket } from "./AddSocket";
 
 export const PrivateRoomCheck = async (
   roomInfo: any,
@@ -12,18 +12,12 @@ export const PrivateRoomCheck = async (
 ) => {
   const isPresent=await checkUser(userId,roomName);
   if (roomInfo.isPrivate&&!isPresent) {
-    AddToPrivateRoom(socket, roomName, userId, password);
+    return AddToPrivateRoom(socket, roomName, userId, password,isPresent);
   } else {
     if (!isPresent) {
-      AddUser(roomName, userId);
+      await AddUser(roomName, userId);
     }
-    if (allSockets.has(roomName)) {
-      allSockets.get(roomName)?.push({ socket, userId });
-      return true;
-    } else {
-      allSockets.set(roomName, [{ socket, userId }]);
-      return true;
-    }
+    return AddSocket({roomName,socket,userId});
   }
 };
 
@@ -31,7 +25,8 @@ const AddToPrivateRoom = async (
   socket: WebSocket,
   roomName: string,
   userId: string,
-  password: string | undefined
+  password: string | undefined,
+  isPresent:boolean
 ) => {
   try {
     if (!password) {
@@ -41,20 +36,15 @@ const AddToPrivateRoom = async (
     const response = await passwordCheck(roomName, password);
     if (!response) {
       socket.send(JSON.stringify({ error: "Check the credentials" }));
-      return;
+      return false;
     }
-    if (!(await checkUser(userId, roomName))) {
+    if (!isPresent){
       AddUser(roomName, userId);
     }
-    if (allSockets.get(roomName)) {
-      allSockets.get(roomName)?.push({ socket, userId });
-      return;
-    } else {
-      allSockets.set(roomName, [{ socket, userId }]);
-      return;
-    }
+    return AddSocket({roomName,socket,userId});
   } catch (err) {
     socket.send(JSON.stringify({ error: "Failed to add to the room" }));
     console.log(err);
+    return false;
   }
 };

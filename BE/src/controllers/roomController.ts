@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { RoomModel } from "../models/roomModel";
+import { getRoom, RoomModel } from "../models/roomModel";
 import { PrivateRoomModel } from "../models/PrivateRoomModel";
 import { hashPassword } from "../helper/hashPassword";
 
@@ -17,6 +17,25 @@ export async function getRooms(req: Request, res: Response) {
 
 export async function getRoomInfo(req: Request, res: Response) {
   //Get the info of that room (if private then send private else )
+  const { roomName } = req.body;
+  const userId = (req as any).userId;
+  try {
+    const response = await getRoom(roomName);
+    if (!response) {
+      return res.status(404).json({ message: "Room Not Found" });
+    }
+    if (response.members.includes(userId)) {
+      return res.status(200).json(response);
+    }
+
+    res.status(200).json({
+      Id: response._id,
+      roomName: response.roomName,
+      createdBy: response.createdBy,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
 }
 
 export async function getChats(req: Request, res: Response) {
