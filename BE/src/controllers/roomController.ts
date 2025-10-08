@@ -15,9 +15,33 @@ export async function getRooms(req: Request, res: Response) {
   }
 }
 
+export async function getMyRooms(req: Request, res: Response) {
+  const userId=(req as any).userId;
+  try {
+    const response = await RoomModel.find({
+      members:userId
+    },{
+      _id:0,
+      isPrivate:0,
+      createdAt:0,
+      updatedAt:0
+    });
+    if (!response) {
+      return res.status(400).json({ message: "No Chat rooms available" });
+    }
+    res.status(200).json(response);
+  } catch (err) {
+    res.status(500).json({ message: "Error at the server side" });
+  }
+}
+ 
+
 export async function getRoomInfo(req: Request, res: Response) {
   //Get the info of that room (if private then send private else )
-  const { roomName } = req.body;
+  const roomName = req.params.roomName;
+  if(!roomName){
+      return res.status(404).json({ message: "RoomName is not provided" });
+  }
   const userId = (req as any).userId;
   try {
     const response = await getRoom(roomName);

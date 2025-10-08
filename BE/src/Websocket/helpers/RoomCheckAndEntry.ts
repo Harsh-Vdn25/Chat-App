@@ -39,7 +39,7 @@ const AddToPrivateRoom = async (
       return false;
     }
     if (!isPresent){
-      AddUser(roomName, userId);
+      await AddUser(roomName, userId);
     }
     return AddSocket({roomName,socket,userId});
   } catch (err) {

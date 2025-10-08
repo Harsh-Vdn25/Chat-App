@@ -6,7 +6,6 @@ import { requiredInfo } from '../config/utils';
 import { TokenCreation } from "../config/utils";
 
 import { getUserByName } from '../models/userModel';
-import type { userType } from '../models/userModel';
 
 const SALT_ROUNDS=Number(requiredInfo.SALT_ROUNDS);
 const JWT_SECRET=requiredInfo.JWT_SECRET;
