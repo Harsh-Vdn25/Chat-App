@@ -1,14 +1,5 @@
-import api from "@/helpers/api";
+import { fetchRoom } from "@/app/api/room";
 
-async function fetchRoomInfo(roomName: string) {
-  try {
-    const response = await api.get(`/room/roominfo/${roomName}`);
-    return response.data;                 
-  } catch (err: any) {
-    console.error("Failed to fetch the room data", err);
-    return null;
-  }
-}
 
 export default async function RoomPage({
   params,
@@ -17,7 +8,7 @@ export default async function RoomPage({
 }) {
   const roomName = params.roomId;
 
-  const roomData = await fetchRoomInfo(roomName);
+  const roomData = await fetchRoom(roomName);
 
 
   if (!roomData) {
