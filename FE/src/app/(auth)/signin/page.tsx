@@ -1,17 +1,31 @@
 'use client';
 import api from "@/helpers/api";
-import { useState } from "react";
+import { useContext,useState } from "react";
 import { useRouter } from "next/navigation";
+import { AuthContext } from "@/app/context/AuthProvider";
 
 export interface authreqType{
   username:string;
   password:string;
 }
 
+export const storeToken=(token:string)=>{
+  if(!token){
+    console.log("Token is empty");
+    return;
+  }
+  localStorage.setItem('Token',token);
+}
+
 export default function Signin() {
 
   const [username,setUsername]=useState('');
   const [password,setPassword]=useState('');
+  const context=useContext(AuthContext);
+  if(!context){
+    throw new Error('')
+  }
+  const {setToken}=context;
   const router=useRouter();
 
   async function SigninReq({username,password}:authreqType){  
@@ -25,6 +39,9 @@ export default function Signin() {
       password:password
     })
     if(response.status===200){
+      const token=response.data?.Token;
+      setToken(token);
+      storeToken(token);
       router.push('/home')
       return;
     }

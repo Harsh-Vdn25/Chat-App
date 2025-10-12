@@ -1,25 +1,49 @@
-import api from "@/helpers/api";
-import Sidebar,{type RoomsType} from "@/components/sidebar";
+"use client";
 
-async function getMyRooms(){
-  try {
-    const response = await api.get("/room/myRooms", {
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGM5MTE0MDY4OTRjY2Y3ZTAwODQ3NCIsImlhdCI6MTc1OTkxODM0MSwiZXhwIjoxNzYwMDkxMTQxfQ.skv3ng5et2RWqkdMyksEQ55oNiPLKGflR6nFV_gEqPs",
-      },
-    });
-    console.log(response.data)
-    const userRoomData=response.data;
-    return userRoomData;
-  } catch (err) {}
-}
-getMyRooms();
-export default async function Rooms() {
-    const userroomdata:RoomsType= await getMyRooms();
+import Sidebar, { RoomsType } from "@/components/sidebar";
+import { getMyRooms, fetchAllRooms, getToken } from "../api/room";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthProvider";
+import { useRouter } from "next/navigation";
+import Chatbox from "@/components/chatbox";
+
+export default function Home() {
+  const router=useRouter();
+  const authcontext=useContext(AuthContext);
+
+  const [roomsData, setRoomsData] = useState<RoomsType | null>(null);
+  const [allrooms,setAllRooms]=useState(false);
+  
+  if(!authcontext){
+    throw new Error("Home must be used within AuthContextProvider");
+  }
+  const {token,setToken}=authcontext;
+
+  useEffect(()=>{
+    const clientToken=getToken();
+    if(!clientToken){
+      router.push('/signin');
+      return;
+    }
+    setToken(clientToken);
+  },[router,setToken])
+
+  useEffect(() => {
+    if (!token) return;
+    async function getRoomInfo() {
+      const response = allrooms ? await fetchAllRooms(token) : await getMyRooms(token);
+      console.log(response.data);
+      setRoomsData(response);
+    }
+    getRoomInfo();
+  }, [token,allrooms]);
+
+  if (!roomsData) return <div>Loading rooms...</div>;
+
   return (
-    <div>
-      <Sidebar data={userroomdata} />
+    <div className="absolute">
+      <Sidebar data={roomsData} setAllRooms={setAllRooms} allrooms={allrooms}/>
+      <Chatbox/>
     </div>
   );
 }

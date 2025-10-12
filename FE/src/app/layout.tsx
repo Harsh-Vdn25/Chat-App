@@ -1,3 +1,5 @@
+"use client"
+import ContextProvider from "./context/AuthProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -12,7 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "Chat App",
   description: "",
 };
@@ -25,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <ContextProvider>
+          {children}
+        </ContextProvider>
       </body>
     </html>
   );

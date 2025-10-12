@@ -1,13 +1,21 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState,useContext } from "react";
 import api from "@/helpers/api";
 import { type authreqType } from "../signin/page";
+import { AuthContext } from "@/app/context/AuthProvider";
+import { storeToken } from "../signin/page";
 
 export default function Signup() {
     const [username,setUsername]=useState('');
   const [password,setPassword]=useState('');
   const router=useRouter();
+  const authcontext=useContext(AuthContext);
+
+  if(!authcontext){
+    throw new Error('');
+  }
+  const {setToken}=authcontext;
 
   async function SignupReq({username,password}:authreqType){  
   if(!username||!password){
@@ -20,6 +28,9 @@ export default function Signup() {
       password:password
     })
     if(response.status===200){
+      const token=response.data?.Token;
+      setToken(token);
+      storeToken(token);
       router.push('/home')
       return;
     }
