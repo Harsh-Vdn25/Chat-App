@@ -1,5 +1,32 @@
 import api from "@/helpers/api";
 
+interface createRoomReqType{
+  roomName:string;
+  token:string;
+  isPrivate:boolean;
+  password?:string;
+}
+
+export async function createRoom({roomName,token,isPrivate,password}:createRoomReqType){
+  try {
+    const response = await api.post(`/room/create`, {
+      roomName:roomName,
+      isPrivate:isPrivate,
+      password:password
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    }
+    );
+    return response.data;
+  } catch (err: any) {
+    console.error("Failed to create the room", err);
+    return null;
+  }
+}
+
 export async function fetchRoom(roomName: string,token:string) {
   try {
     const response = await api.get(`/room/roominfo/${roomName}`, {
@@ -23,6 +50,7 @@ export async function fetchAllRooms(token:string) {
     });
     return response.data;
   } catch (err) {
+    console.error("Failed to fetch the rooms data", err);
     return null;
   }
 }
@@ -37,7 +65,9 @@ export async function getMyRooms(token:string) {
     console.log(response.data);
     const userRoomData = response.data;
     return userRoomData;
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export const getToken=()=>{

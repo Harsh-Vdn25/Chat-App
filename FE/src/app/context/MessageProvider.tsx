@@ -1,8 +1,6 @@
 import { ReactNode, SetStateAction, createContext,useState } from "react";
 
-export interface ChatboxProps {
-  roomName: string;
-}
+
 export interface ChatsType {
   message: string;
   userName: string;

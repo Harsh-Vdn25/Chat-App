@@ -1,24 +1,17 @@
 "use client";
 import { useEffect, useState, useContext, RefObject, useRef } from "react";
 import { AuthContext, SocketContext } from "@/app/context/AuthProvider";
-import { ChatContext } from "@/app/context/MessageProvider";
+import { ChatContext,type ChatsType } from "@/app/context/MessageProvider";
 import sendMessage from "@/app/websocket/chat";
+import Button from "./button";
 
 export interface ChatboxProps {
   roomName: string;
+  setActiveRoom:React.Dispatch<React.SetStateAction<string>>;
 }
 
-interface ChatsType {
-  message: string;
-  userName: string;
-}
 
-//so the chats are like this {"roomName":[{message,userName}]}
-interface ChatObjType {
-  [roomName: string]: ChatsType[];
-}
-
-export default function Chatbox({ roomName }: ChatboxProps) {
+export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
   const authcontext = useContext(AuthContext);
   const socketcontext = useContext(SocketContext);
   const chatcontext=useContext(ChatContext);
@@ -105,6 +98,7 @@ export default function Chatbox({ roomName }: ChatboxProps) {
       socketRef.current?.removeEventListener("close", handleClose);
       socketRef.current = null;
       initializedRef.current = false;
+      setisJoin(false);
     };
   }, [roomName]);
 
@@ -122,8 +116,15 @@ export default function Chatbox({ roomName }: ChatboxProps) {
 
   return (
     <div className="h-full flex flex-col bg-gray-100">
-      <div className="p-4 bg-gray-800 text-white text-lg font-semibold shadow">
-        {roomName}
+      <div className="p-4 flex justify-between bg-gray-800 text-white text-lg font-semibold shadow">
+        <div>
+          {roomName}
+        </div>
+
+        <Button
+        type="button" text="Close"
+        onClick={()=>setActiveRoom('')}
+        className="hover:border-b p-1 m-0 text-md hover:border-b-white"/>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">

@@ -5,6 +5,7 @@ import api from "@/helpers/api";
 import { type authreqType } from "../signin/page";
 import { AuthContext } from "@/app/context/AuthProvider";
 import { storeToken } from "../signin/page";
+import LabelledInput from "@/components/Input";
 
 export default function Signup() {
     const [username,setUsername]=useState('');
@@ -52,7 +53,7 @@ export default function Signup() {
             </div>
           </div>
           <div className="pt-2">
-            <LabelledInput label="Username" placeholder="harsha@gmail.com" value={username} onChange={(e)=>setUsername(e.target.value)}/>
+            <LabelledInput label="Username" placeholder="Harsha123" value={username} onChange={(e)=>setUsername(e.target.value)}/>
             <LabelledInput label="Password" type="password" placeholder="123456" value={password} onChange={(e)=>setPassword(e.target.value)}/>
             <button
               type="button"
@@ -64,32 +65,6 @@ export default function Signup() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-interface LabelledInputType {
-  label: string;
-  placeholder: string;
-  type?: string;
-  value:string;
-  onChange:(e:React.ChangeEvent<HTMLInputElement>)=>void;
-}
-
-function LabelledInput({ label, placeholder, type,value,onChange }: LabelledInputType) {
-  return (
-    <div>
-      <label className="block mb-2 text-sm text-black font-semibold pt-4">
-        {label}
-      </label>
-      <input
-        type={type || "text"}
-        value={value}
-        onChange={onChange}
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-5 py-2.5"
-        placeholder={placeholder}
-        required
-      />
     </div>
   );
 }
