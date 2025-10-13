@@ -7,24 +7,24 @@ export const PrivateRoomCheck = async (
   roomInfo: any,
   socket: WebSocket,
   roomName: string,
-  userId: string,
+  userName: string,
   password: string | undefined
 ) => {
-  const isPresent=await checkUser(userId,roomName);
+  const isPresent=await checkUser(userName,roomName);
   if (roomInfo.isPrivate&&!isPresent) {
-    return AddToPrivateRoom(socket, roomName, userId, password,isPresent);
+    return AddToPrivateRoom(socket, roomName, userName, password,isPresent);
   } else {
     if (!isPresent) {
-      await AddUser(roomName, userId);
+      await AddUser(roomName, userName);
     }
-    return AddSocket({roomName,socket,userId});
+    return AddSocket({roomName,socket,userName});
   }
 };
 
 const AddToPrivateRoom = async (
   socket: WebSocket,
   roomName: string,
-  userId: string,
+  userName: string,
   password: string | undefined,
   isPresent:boolean
 ) => {
@@ -39,9 +39,9 @@ const AddToPrivateRoom = async (
       return false;
     }
     if (!isPresent){
-      await AddUser(roomName, userId);
+      await AddUser(roomName, userName);
     }
-    return AddSocket({roomName,socket,userId});
+    return AddSocket({roomName,socket,userName});
   } catch (err) {
     socket.send(JSON.stringify({ error: "Failed to add to the room" }));
     console.log(err);

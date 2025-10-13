@@ -3,6 +3,7 @@ import { getRoom } from "../../models/roomModel";
 import jwt from "jsonwebtoken";
 import { requiredInfo } from "../../config/utils";
 import { TokenType } from "../../middleware/auth";
+import { getUserName } from "../../models/userModel";
 
 export const CheckRequest = async (roomName: string, socket: WebSocket):Promise<Object> => {
   if (!roomName) {
@@ -25,7 +26,7 @@ export const CheckRequest = async (roomName: string, socket: WebSocket):Promise<
 };
 
 
-export const decodeToken=(token:string,socket:WebSocket)=>{
+export const decodeToken=async(token:string,socket:WebSocket)=>{
   if(!token){
     return '';
   }
@@ -36,5 +37,7 @@ export const decodeToken=(token:string,socket:WebSocket)=>{
     }));
     return ;
   }
-  return userInfo.id;
+  const userName=await getUserName(userInfo.id);
+  console.log(userName);
+  return userName;
 }

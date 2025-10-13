@@ -26,3 +26,18 @@ export const getUserByName=async(username:string)=>{
         console.error(err);
     }
 }
+
+export const getUserName=async(userId:string)=>{
+    console.log(userId);
+    try{
+        const response=await userModel.findOne({
+            _id:userId
+        })
+        if(!response){
+            return false;
+        }
+        return response.username;
+    }catch(err){
+        return false;
+    }
+}

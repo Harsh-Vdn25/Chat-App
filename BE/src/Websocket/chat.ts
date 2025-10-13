@@ -7,7 +7,7 @@ import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 
 export interface SocketArrType {
   socket: WebSocket;
-  userId: string;
+  userName: string;
 }
 
 export const allSockets = new Map<string, SocketArrType[]>();
@@ -27,11 +27,12 @@ export const connectWebSocket = (server: Server) => {
       if (type === "join") {
         const joinData = <joinType>parsed.data;
         const { roomName, token, password } = joinData;
-        const userId = decodeToken(token,socket);
-        if(!userId){
-          return ;
+        const userName = await decodeToken(token,socket);
+
+        if(!userName){
+          return socket.send(JSON.stringify({message:"User doesn't exist "}));
         }
-        if (checkDuplicateSockets(socket, roomName, userId)) {
+        if (checkDuplicateSockets(socket, roomName, userName)) {
           return;
         }
 
@@ -44,7 +45,7 @@ export const connectWebSocket = (server: Server) => {
           roomInfo,
           socket,
           roomName,
-          userId,
+          userName,
           password
         );
         if (!isAdded) {
@@ -63,10 +64,11 @@ export const connectWebSocket = (server: Server) => {
         }
         const roomSockets = allSockets.get(roomName);
         if (roomSockets?.some((sObj) => sObj.socket === socket)) {
+          const userSent=roomSockets?.find(sObj=>sObj.socket===socket)?.userName;
           roomSockets.forEach(sObj => {
             sObj.socket.send(JSON.stringify({
               message:message,
-              userId:sObj.userId
+              userName:userSent
             }))
           });;
           return;

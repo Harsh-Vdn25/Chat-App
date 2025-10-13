@@ -8,7 +8,6 @@ import { TokenCreation } from "../config/utils";
 import { getUserByName } from '../models/userModel';
 
 const SALT_ROUNDS=Number(requiredInfo.SALT_ROUNDS);
-const JWT_SECRET=requiredInfo.JWT_SECRET;
 
 export const Signup = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;

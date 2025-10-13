@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useContext, RefObject, useRef } from "react";
 import { AuthContext, SocketContext } from "@/app/context/AuthProvider";
+import { ChatContext } from "@/app/context/MessageProvider";
 import sendMessage from "@/app/websocket/chat";
 
 export interface ChatboxProps {
@@ -9,10 +10,10 @@ export interface ChatboxProps {
 
 interface ChatsType {
   message: string;
-  userId: string;
+  userName: string;
 }
 
-//so the chats are like this {"roomName":[{message,userId}]}
+//so the chats are like this {"roomName":[{message,userName}]}
 interface ChatObjType {
   [roomName: string]: ChatsType[];
 }
@@ -20,23 +21,27 @@ interface ChatObjType {
 export default function Chatbox({ roomName }: ChatboxProps) {
   const authcontext = useContext(AuthContext);
   const socketcontext = useContext(SocketContext);
-
+  const chatcontext=useContext(ChatContext);
   if (!authcontext) {
     throw new Error("");
   }
   if (!socketcontext) {
     throw new Error("");
   }
+  if (!chatcontext) {
+    throw new Error("");
+  }
 
   const { token } = authcontext;
   const { socketRef,initializedRef } = socketcontext;
+  const {Chats,setChats}=chatcontext;
   const [message, setMessage] = useState("");
-  const [Chats, setChats] = useState<ChatObjType>({});
   const [isJoin, setisJoin] = useState(true);
 
   async function InitializeSocket(socketRef: RefObject<WebSocket | null>) {
     if (!socketRef.current) {
       socketRef.current = new WebSocket("ws://localhost:5001");
+       
       await new Promise<void>((resolve) => {
         socketRef.current!.addEventListener("open", () => {
           console.log("connected");
@@ -66,7 +71,7 @@ export default function Chatbox({ roomName }: ChatboxProps) {
     try {
       const message = JSON.parse(event.data);
       console.log(message, typeof message);
-      if (message.message && message.userId) {
+      if (message.message && message.userName) {
         setChats((prev) => ({
           ...prev,
           [roomName]: [...(prev[roomName] || []), message],
@@ -129,9 +134,9 @@ export default function Chatbox({ roomName }: ChatboxProps) {
           Chats[roomName].map((chat: ChatsType, index) => (
             <div
               className="bg-gray-700 flex flex-col text-white px-4 py-2 rounded-lg self-end max-w-xs"
-              key={`${chat.userId}-${index}`}
+              key={`${chat.userName}-${index}`}
             >
-              <p>Sent By:</p>
+              <p>Sent By:{chat.userName}</p>
               <p>{chat.message}</p>
             </div>
           ))

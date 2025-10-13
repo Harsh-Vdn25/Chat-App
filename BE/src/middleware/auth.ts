@@ -2,12 +2,13 @@ import {Request,Response,NextFunction} from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { RoomModel } from '../models/roomModel';
 import { requiredInfo } from '../config/utils';
+import { getUserName } from '../models/userModel';
 
 export interface TokenType extends JwtPayload{
   id:string
 }
 
-export  function verifyToken(req: Request, res: Response, next: NextFunction){
+export async function verifyToken(req: Request, res: Response, next: NextFunction){
   const BearerToken=req.headers.authorization;
   const Token=BearerToken?.split(' ')[1];
   if(!Token){
@@ -19,8 +20,12 @@ export  function verifyToken(req: Request, res: Response, next: NextFunction){
     console.log("Not authorized");
     return;
   }
-  
-  (req as any).userId=decoded.id;
+  const userName=await getUserName(decoded.id);
+  if(!userName){
+    return res.status(404).json({message:"Username is not found"});
+  }
+
+  (req as any).userName=userName;
   next();
 }
 

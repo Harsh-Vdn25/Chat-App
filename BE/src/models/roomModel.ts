@@ -1,11 +1,11 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 interface RoomType {
   _id: Schema.Types.ObjectId;
   roomName: string;
   capacity: number;
   createdBy: Schema.Types.ObjectId;
-  members: Schema.Types.ObjectId[];
+  members: String[];
   isPrivate: boolean;
 }
 
@@ -13,9 +13,9 @@ const RoomSchema = new Schema<RoomType>(
   {
     roomName: { type: String, required: true, unique: true },
     capacity: Number,
-    createdBy: { type: Schema.Types.ObjectId, ref: "user" },
+    createdBy: { type: String, ref: "user" },
     isPrivate: { type: Boolean, default: false },
-    members: [{ type: Schema.Types.ObjectId, ref: "user" }],
+    members: [{ type: String, ref: "user" }],
 },
   {
     timestamps: true,
@@ -43,14 +43,14 @@ export const getRoom = async (roomName: string) => {
   }
 };
 
-export const checkUser = async (userId: string | null,roomName:string|null) => {
-  if (!userId||!roomName) {
+export const checkUser = async (userName: string | null,roomName:string|null) => {
+  if (!userName||!roomName) {
     return false;
   }
   try {
     const isAuthorized = await RoomModel.findOne({
       roomName:roomName,
-      members: new mongoose.Types.ObjectId(userId)
+      members: userName
     });
 
     return !!isAuthorized;
@@ -61,14 +61,14 @@ export const checkUser = async (userId: string | null,roomName:string|null) => {
   }
 };
 
-export const AddUser = async(roomName:string,userId:string) => {
+export const AddUser = async(roomName:string,userName:string) => {
   try {
     const addedUser = await RoomModel.updateOne(
       {
         roomName: roomName,
       },
       {
-        $addToSet: { members: userId },
+        $addToSet: { members: userName },
       }
     );
   } catch (err) {

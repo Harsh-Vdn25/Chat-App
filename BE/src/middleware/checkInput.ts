@@ -5,7 +5,7 @@ export const checkCreateRoomIP=(req:Request,res:Response,next:NextFunction)=>{
     const requiredbody=z.object({
         roomName:z.string().min(2),
         isPrivate:z.boolean(),
-        password:z.string().min(3)
+        password:z.string().optional(),
     })
     const isValidated=requiredbody.safeParse(req.body);
     if(!isValidated.success){

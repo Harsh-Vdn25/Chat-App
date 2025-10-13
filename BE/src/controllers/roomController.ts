@@ -20,10 +20,11 @@ export async function getRooms(req: Request, res: Response) {
 }
 
 export async function getMyRooms(req: Request, res: Response) {
-  const userId=(req as any).userId;
+  const userName=(req as any).userName;
+
   try {
     const response = await RoomModel.find({
-      members:userId
+      members:userName
     },{
       _id:0,
       isPrivate:0,
@@ -46,13 +47,13 @@ export async function getRoomInfo(req: Request, res: Response) {
   if(!roomName){
       return res.status(404).json({ message: "RoomName is not provided" });
   }
-  const userId = (req as any).userId;
+  const userName = (req as any).userName;
   try {
     const response = await getRoom(roomName);
     if (!response) {
       return res.status(404).json({ message: "Room Not Found" });
     }
-    if (response.members.includes(userId)) {
+    if (response.members.includes(userName)) {
       return res.status(200).json(response);
     }
 
@@ -68,12 +69,12 @@ export async function getRoomInfo(req: Request, res: Response) {
 
 export async function getChats(req: Request, res: Response) {
   //Get the chats of that room
-  const userId = (req as any).userId;
+  const userName = (req as any).userName;
   const roomId = req.params.roomId;
   try {
     const response = await RoomModel.findOne({
       roomId: roomId,
-      members: userId,
+      members: userName,
     });
   } catch (err) {
     res.status(500).json({ message: "Error at the server side" });
@@ -81,20 +82,23 @@ export async function getChats(req: Request, res: Response) {
 }
 
 export async function createRoom(req: Request, res: Response) {
-  const { roomName, isPrivate, password } = req.body;
-  const userId = (req as any).userId;
+  const { roomName, isPrivate } = req.body;
+  const userName = (req as any).userName;
+  console.log(userName);
   try {
     const response = await RoomModel.create({
       roomName: roomName,
       isPrivate: isPrivate,
-      createdBy: userId,
+      createdBy: userName,
       capacity: 30,
-      members: [userId],
+      members: [userName],
     });
     if (!response) {
       return res.json("Failed to create Room");
     }
     if (response.isPrivate) {
+      const {password}=req.body;
+      if (!password) throw new Error("Password is required for private rooms");
       //hashing the password;
       const hashedPassword = await hashPassword(password);
       const AddRoom = await PrivateRoomModel.create({
