@@ -64,7 +64,10 @@ export const connectWebSocket = (server: Server) => {
         const roomSockets = allSockets.get(roomName);
         if (roomSockets?.some((sObj) => sObj.socket === socket)) {
           roomSockets.forEach(sObj => {
-            sObj.socket.send(JSON.stringify(message))
+            sObj.socket.send(JSON.stringify({
+              message:message,
+              userId:sObj.userId
+            }))
           });;
           return;
         }else{

@@ -6,6 +6,7 @@ export interface RoomType {
   capacity: number;
   createdBy: string;
   members: string[];
+  onClick?:()=>void;
 }
 
 export type RoomsType=RoomType[];
@@ -14,10 +15,11 @@ export interface SidebarProps {
   data: RoomsType;
   allrooms:boolean;
   setAllRooms:React.Dispatch<React.SetStateAction<boolean>>;
+  setActiceRoom:React.Dispatch<React.SetStateAction<string>>;
 }
 
 
-export default function Sidebar({ data,setAllRooms,allrooms }: SidebarProps) {
+export default function Sidebar({ data,setAllRooms,allrooms,setActiceRoom }: SidebarProps) {
   return (
     <div className="relative h-screen w-80 bg-gray-900 p-4 shadow-lg overflow-y-auto border-r border-gray-700">
       <h2 className="text-2xl font-bold text-white mb-5 border-b border-gray-700 pb-2">
@@ -35,6 +37,7 @@ export default function Sidebar({ data,setAllRooms,allrooms }: SidebarProps) {
               roomName={room.roomName}
               capacity={room.capacity}
               createdBy={room.createdBy}
+              onClick={()=>setActiceRoom(room.roomName)}
             />
           ))}
         </div>
@@ -45,15 +48,15 @@ export default function Sidebar({ data,setAllRooms,allrooms }: SidebarProps) {
   );
 }
 
-type RoomInfoType = Pick<RoomType, "roomName" | "capacity" | "createdBy">;
+type RoomInfoType = Pick<RoomType, "roomName" | "capacity" | "createdBy"|"onClick">;
 
-function RoomInfo({ roomName, capacity, createdBy }: RoomInfoType) {
+function RoomInfo({ roomName, capacity, createdBy,onClick }: RoomInfoType) {
   const router = useRouter();
 
   return (
     <button
       type="button"
-      onClick={() => router.push(`/room/${roomName}`)}
+      onClick={onClick}
       className="w-full text-left bg-gray-800 hover:bg-gray-700 transition-all cursor-pointer duration-200 rounded-md p-4 shadow-sm hover:shadow-md focus:ring-2 focus:ring-gray-600 focus:outline-none"
     >
       <p className="text-lg font-semibold text-white truncate">{roomName}</p>    
