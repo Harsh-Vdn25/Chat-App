@@ -40,6 +40,7 @@ export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
           console.log("connected");
           resolve();
         });
+
         socketRef.current?.addEventListener("open", handleOpen);
         socketRef.current?.addEventListener("close", handleClose);
         socketRef.current?.addEventListener("message", handleMessage);
@@ -86,6 +87,11 @@ export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
       await InitializeSocket(socketRef);
     }
 
+    async function ChangeRoom(){
+      socketRef.current?.send(JSON.stringify({
+        
+      }))
+    }
     setUpSocket();
 
     return () => {

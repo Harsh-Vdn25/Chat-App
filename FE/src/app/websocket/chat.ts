@@ -20,6 +20,7 @@ export default async function sendMessage({
 }: sendMessageType) {
   if(socketRef.current?.readyState===WebSocket.OPEN){
     if (isJoin) {
+      
     socketRef.current?.send(
       JSON.stringify({
         type: "join",

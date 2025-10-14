@@ -52,7 +52,7 @@ export default function Home() {
         data={roomsData}
         setAllRooms={setAllRooms}
         allrooms={allrooms}
-        setActiceRoom={setActiveRoom}
+        setActiveRoom={setActiveRoom}
       />
 
       {activeRoom ? (
@@ -83,7 +83,7 @@ export default function Home() {
           </div>
 
           {create ? (
-            <CreateRoom />
+            <CreateRoom/>
           ) : (
             <div className="flex h-screen bg-white justify-center items-center">
               <div className="max-w-xl text-center text-gray-800 text-lg">

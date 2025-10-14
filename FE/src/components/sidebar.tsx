@@ -15,11 +15,11 @@ export interface SidebarProps {
   data: RoomsType;
   allrooms:boolean;
   setAllRooms:React.Dispatch<React.SetStateAction<boolean>>;
-  setActiceRoom:React.Dispatch<React.SetStateAction<string>>;
+  setActiveRoom:React.Dispatch<React.SetStateAction<string>>;
 }
 
 
-export default function Sidebar({ data,setAllRooms,allrooms,setActiceRoom }: SidebarProps) {
+export default function Sidebar({ data,setAllRooms,allrooms,setActiveRoom }: SidebarProps) {
   return (
     <div className="relative h-screen w-80 bg-gray-900 p-4 shadow-lg overflow-y-auto border-r border-gray-700">
       <h2 className="text-2xl font-bold text-white mb-5 border-b border-gray-700 pb-2">
@@ -37,7 +37,7 @@ export default function Sidebar({ data,setAllRooms,allrooms,setActiceRoom }: Sid
               roomName={room.roomName}
               capacity={room.capacity}
               createdBy={room.createdBy}
-              onClick={()=>setActiceRoom(room.roomName)}
+              onClick={()=>setActiveRoom(room.roomName)}
             />
           ))}
         </div>

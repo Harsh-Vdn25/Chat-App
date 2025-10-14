@@ -27,10 +27,12 @@ export const connectWebSocket = (server: Server) => {
       if (type === "join") {
         const joinData = <joinType>parsed.data;
         const { roomName, token, password } = joinData;
-        const userName = await decodeToken(token,socket);
+        const userName = await decodeToken(token, socket);
 
-        if(!userName){
-          return socket.send(JSON.stringify({message:"User doesn't exist "}));
+        if (!userName) {
+          return socket.send(
+            JSON.stringify({ message: "User doesn't exist " })
+          );
         }
         if (checkDuplicateSockets(socket, roomName, userName)) {
           return;
@@ -64,18 +66,45 @@ export const connectWebSocket = (server: Server) => {
         }
         const roomSockets = allSockets.get(roomName);
         if (roomSockets?.some((sObj) => sObj.socket === socket)) {
-          const userSent=roomSockets?.find(sObj=>sObj.socket===socket)?.userName;
-          roomSockets.forEach(sObj => {
-            sObj.socket.send(JSON.stringify({
-              message:message,
-              userName:userSent
-            }))
-          });;
+          const userSent = roomSockets?.find(
+            (sObj) => sObj.socket === socket
+          )?.userName;
+          roomSockets.forEach((sObj) => {
+            sObj.socket.send(
+              JSON.stringify({
+                message: message,
+                userName: userSent,
+              })
+            );
+          });
           return;
-        }else{
-           socket.send(JSON.stringify({error:"Please join the room"}))
-           return;
+        } else {
+          socket.send(JSON.stringify({ error: "Please join the room" }));
+          return;
         }
+      }
+
+      if (type === "change") {
+        const {roomName,token}=parsed.data;
+        const JoiningRoom=allSockets.get(roomName);
+        let check;
+        const keys=allSockets.keys();
+        keys.forEach((room) => {
+          check=allSockets.get(room)?.find(sArr=>sArr.socket===socket);
+          if(check){
+            const newSocketArr=allSockets.get(room)?.filter(sArr=>sArr.socket!==socket);
+            if(!newSocketArr){
+              allSockets.delete(room);
+              return;
+            }
+            allSockets.set(room,newSocketArr);
+          }
+        });
+        const userName=await decodeToken(token,socket);
+        if(!userName){
+          return;
+        }
+        JoiningRoom?.push({socket,userName});
       }
     });
 
