@@ -38,12 +38,5 @@ export default async function sendMessage({
       })
     );
   }
-  }else{
-    socketRef.current?.addEventListener('open',()=>socketRef.current?.send(JSON.stringify({
-        type: "join",
-        roomName: roomName,
-        token: token,
-      })));
-      setisJoin(false)
   }
 }

@@ -28,7 +28,6 @@ export const getUserByName=async(username:string)=>{
 }
 
 export const getUserName=async(userId:string)=>{
-    console.log(userId);
     try{
         const response=await userModel.findOne({
             _id:userId

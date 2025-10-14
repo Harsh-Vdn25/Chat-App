@@ -30,7 +30,8 @@ export const decodeToken=async(token:string,socket:WebSocket)=>{
   if(!token){
     return '';
   }
-  const userInfo=jwt.verify(token,requiredInfo.JWT_SECRET) as TokenType;
+  try{
+    const userInfo=jwt.verify(token,requiredInfo.JWT_SECRET) as TokenType;
   if(!userInfo){
     socket.send(JSON.stringify({
       error:"Token expired"
@@ -38,6 +39,10 @@ export const decodeToken=async(token:string,socket:WebSocket)=>{
     return ;
   }
   const userName=await getUserName(userInfo.id);
-  console.log(userName);
   return userName;
+  }catch(err){
+    socket.send(JSON.stringify({
+      error:"Problem"
+    }))
+  }
 }

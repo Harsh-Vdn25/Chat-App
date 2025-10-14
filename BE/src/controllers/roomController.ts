@@ -84,7 +84,6 @@ export async function getChats(req: Request, res: Response) {
 export async function createRoom(req: Request, res: Response) {
   const { roomName, isPrivate } = req.body;
   const userName = (req as any).userName;
-  console.log(userName);
   try {
     const response = await RoomModel.create({
       roomName: roomName,

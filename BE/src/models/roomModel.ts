@@ -4,7 +4,7 @@ interface RoomType {
   _id: Schema.Types.ObjectId;
   roomName: string;
   capacity: number;
-  createdBy: Schema.Types.ObjectId;
+  createdBy: String;
   members: String[];
   isPrivate: boolean;
 }

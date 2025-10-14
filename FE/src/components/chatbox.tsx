@@ -1,20 +1,19 @@
 "use client";
 import { useEffect, useState, useContext, RefObject, useRef } from "react";
 import { AuthContext, SocketContext } from "@/app/context/AuthProvider";
-import { ChatContext,type ChatsType } from "@/app/context/MessageProvider";
+import { ChatContext, type ChatsType } from "@/app/context/MessageProvider";
 import sendMessage from "@/app/websocket/chat";
 import Button from "./button";
 
 export interface ChatboxProps {
   roomName: string;
-  setActiveRoom:React.Dispatch<React.SetStateAction<string>>;
+  setActiveRoom: React.Dispatch<React.SetStateAction<string>>;
 }
 
-
-export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
+export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
   const authcontext = useContext(AuthContext);
   const socketcontext = useContext(SocketContext);
-  const chatcontext=useContext(ChatContext);
+  const chatcontext = useContext(ChatContext);
   if (!authcontext) {
     throw new Error("");
   }
@@ -26,15 +25,16 @@ export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
   }
 
   const { token } = authcontext;
-  const { socketRef,initializedRef } = socketcontext;
-  const {Chats,setChats}=chatcontext;
+  const { socketRef } = socketcontext;
+  const { Chats, setChats } = chatcontext;
+  const [activeChats,setActiveChats]=useState<ChatsType[]>([]);
   const [message, setMessage] = useState("");
   const [isJoin, setisJoin] = useState(true);
 
   async function InitializeSocket(socketRef: RefObject<WebSocket | null>) {
     if (!socketRef.current) {
       socketRef.current = new WebSocket("ws://localhost:5001");
-       
+
       await new Promise<void>((resolve) => {
         socketRef.current!.addEventListener("open", () => {
           console.log("connected");
@@ -66,44 +66,62 @@ export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
       const message = JSON.parse(event.data);
       console.log(message, typeof message);
       if (message.message && message.userName) {
-        setChats((prev) => ({
-          ...prev,
-          [roomName]: [...(prev[roomName] || []), message],
-        }));
+//Use pubsubs instead and save the messages to the database before changing to the other room
+        // setChats((prev) => ({
+        //   ...prev,
+        //   [roomName]: [...(prev[roomName] || []), message],
+        // }));
+        setActiveChats((prevChats)=>([
+          ...prevChats,
+          message
+        ]));
       }
     } catch (err) {
       console.log(err);
     }
   };
 
+// useEffect(() => {
+//   console.log(activeChats,roomName);
+//   setActiveChats(Chats[roomName] || []);
+// }, [roomName, Chats]);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    setActiveChats([]);
+    (async () => {
+      async function setUpSocket() {
+        await InitializeSocket(socketRef);
+      }
 
-    socketRef.current = null;
+      if (!socketRef.current) {
+        setUpSocket();
+      }
 
-    async function setUpSocket() {
-      await InitializeSocket(socketRef);
-    }
+      async function ChangeRoom() {
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+          await socketRef.current?.send(
+            JSON.stringify({
+              type: "change",
+              roomName: roomName,
+              token: token,
+            })
+          );
+          console.log("changed sucessfully");
+        }
+      }
 
-    async function ChangeRoom(){
-      socketRef.current?.send(JSON.stringify({
-        
-      }))
-    }
-    setUpSocket();
+      await ChangeRoom();
+    })();
 
     return () => {
       if (process.env.NODE_ENV === "development") {
-    console.log("Skipping cleanup in dev mode to avoid double socket init");
-    return;
-  }
+        console.log("Skipping cleanup in dev mode to avoid double socket init");
+        return;
+      }
       socketRef.current?.removeEventListener("open", handleOpen);
       socketRef.current?.removeEventListener("message", handleMessage);
       socketRef.current?.removeEventListener("close", handleClose);
       socketRef.current = null;
-      initializedRef.current = false;
       setisJoin(false);
     };
   }, [roomName]);
@@ -123,22 +141,22 @@ export default function Chatbox({ roomName,setActiveRoom }: ChatboxProps) {
   return (
     <div className="h-full flex flex-col bg-gray-100">
       <div className="p-4 flex justify-between bg-gray-800 text-white text-lg font-semibold shadow">
-        <div>
-          {roomName}
-        </div>
+        <div>{roomName}</div>
 
         <Button
-        type="button" text="Close"
-        onClick={()=>setActiveRoom('')}
-        className="hover:border-b p-1 m-0 text-md hover:border-b-white"/>
+          type="button"
+          text="Close"
+          onClick={() => setActiveRoom("")}
+          className="hover:border-b p-1 m-0 text-md hover:border-b-white"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         <div className="bg-gray-700 text-white px-4 py-2 rounded-lg self-end max-w-xs">
           Welcome to {roomName}!
         </div>
-        {Chats[roomName] ? (
-          Chats[roomName].map((chat: ChatsType, index) => (
+        {activeChats ? (
+          activeChats.map((chat: ChatsType, index) => (
             <div
               className="bg-gray-700 flex flex-col text-white px-4 py-2 rounded-lg self-end max-w-xs"
               key={`${chat.userName}-${index}`}

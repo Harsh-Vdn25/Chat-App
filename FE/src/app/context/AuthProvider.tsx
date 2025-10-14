@@ -8,7 +8,6 @@ interface AuthContextType {
 }
 interface RefObjectType {
   socketRef: RefObject<WebSocket | null>;
-  initializedRef:RefObject<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -19,10 +18,9 @@ export const SocketContext = createContext<RefObjectType | null>(null);
 export default function ContextProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState("");
   const socketRef = useRef(null);
-  const initializedRef=useRef(false);
   return (
     <AuthContext.Provider value={{ token, setToken }}>
-      <SocketContext.Provider value={{socketRef,initializedRef}}>
+      <SocketContext.Provider value={{socketRef}}>
         {children}
       </SocketContext.Provider>
     </AuthContext.Provider>
