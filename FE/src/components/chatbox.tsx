@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState, useContext, RefObject, useRef } from "react";
+import { useEffect, useState, useContext, RefObject } from "react";
 import { AuthContext, SocketContext } from "@/app/context/AuthProvider";
 import { ChatContext, type ChatsType } from "@/app/context/MessageProvider";
 import sendMessage from "@/app/websocket/chat";
 import Button from "./button";
+import { getMessages, saveMessages } from "@/app/api/message";
 
 export interface ChatboxProps {
   roomName: string;
@@ -26,10 +27,10 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
 
   const { token } = authcontext;
   const { socketRef } = socketcontext;
-  const { Chats, setChats } = chatcontext;
   const [activeChats,setActiveChats]=useState<ChatsType[]>([]);
   const [message, setMessage] = useState("");
   const [isJoin, setisJoin] = useState(true);
+  const [prevRoom,setPrevRoom]=useState('');
 
   async function InitializeSocket(socketRef: RefObject<WebSocket | null>) {
     if (!socketRef.current) {
@@ -66,11 +67,6 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
       const message = JSON.parse(event.data);
       console.log(message, typeof message);
       if (message.message && message.userName) {
-//Use pubsubs instead and save the messages to the database before changing to the other room
-        // setChats((prev) => ({
-        //   ...prev,
-        //   [roomName]: [...(prev[roomName] || []), message],
-        // }));
         setActiveChats((prevChats)=>([
           ...prevChats,
           message
@@ -81,50 +77,71 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
     }
   };
 
-// useEffect(() => {
-//   console.log(activeChats,roomName);
-//   setActiveChats(Chats[roomName] || []);
-// }, [roomName, Chats]);
 
-  useEffect(() => {
-    setActiveChats([]);
-    (async () => {
-      async function setUpSocket() {
+useEffect(() => {
+  const handleRoomChange = async () => {
+    if (!roomName || !token) return;
+
+    if (prevRoom && activeChats.length > 0) {
+      try {
+        await saveMessages({ roomName: prevRoom, token, activeChats });
+        console.log("Messages saved successfully");
+        setActiveChats([]);
+      } catch (err) {
+        console.error("Error saving messages:", err);
+      }
+    } else {
+      setPrevRoom(roomName);
+    }
+
+    try {
+      const messages= await getMessages({ roomName, token });
+
+      if (!messages) {
+        return;
+      }
+      const prevRoomMessages:ChatsType[]=messages?.data;
+      setActiveChats(prevRoomMessages);
+    } catch (err) {
+      console.error("Error fetching previous messages:", err);
+    }
+
+    try {
+      if (!socketRef.current) {
         await InitializeSocket(socketRef);
       }
 
-      if (!socketRef.current) {
-        setUpSocket();
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        await socketRef.current.send(
+          JSON.stringify({
+            type: "change",
+            roomName,
+            token,
+          })
+        );
+        console.log("Room changed successfully");
       }
+    } catch (err) {
+      console.error("Socket initialization or room change failed:", err);
+    }
+  };
 
-      async function ChangeRoom() {
-        if (socketRef.current?.readyState === WebSocket.OPEN) {
-          await socketRef.current?.send(
-            JSON.stringify({
-              type: "change",
-              roomName: roomName,
-              token: token,
-            })
-          );
-          console.log("changed sucessfully");
-        }
-      }
+  handleRoomChange();
 
-      await ChangeRoom();
-    })();
+  return () => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Skipping cleanup in dev mode to avoid double socket init");
+      return;
+    }
 
-    return () => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Skipping cleanup in dev mode to avoid double socket init");
-        return;
-      }
-      socketRef.current?.removeEventListener("open", handleOpen);
-      socketRef.current?.removeEventListener("message", handleMessage);
-      socketRef.current?.removeEventListener("close", handleClose);
-      socketRef.current = null;
-      setisJoin(false);
-    };
-  }, [roomName]);
+    socketRef.current?.removeEventListener("open", handleOpen);
+    socketRef.current?.removeEventListener("message", handleMessage);
+    socketRef.current?.removeEventListener("close", handleClose);
+    socketRef.current = null;
+    setisJoin(false);
+  };
+}, [roomName]);
+
 
   async function sendMessagehelper() {
     await sendMessage({

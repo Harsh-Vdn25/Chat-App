@@ -1,6 +1,6 @@
 import api from "@/helpers/api";
 
-interface createRoomReqType{
+export interface createRoomReqType{
   roomName:string;
   token:string;
   isPrivate:boolean;

@@ -32,18 +32,29 @@ export default function Home() {
     }
     setToken(clientToken);
   }, [router, setToken]);
-
-  useEffect(() => {
+useEffect(() => {
     if (!token) return;
     async function getRoomInfo() {
-      const response = allrooms
-        ? await fetchAllRooms(token)
-        : await getMyRooms(token);
-      console.log(response.data);
-      setRoomsData(response);
+      try {
+        const response = allrooms
+          ? await fetchAllRooms(token)
+          : await getMyRooms(token);
+          console.log(response);
+        if (response.data==='expired') {
+          localStorage.removeItem("token");
+          router.push("/signin");
+          return;
+        }
+
+        setRoomsData(response);
+      } catch (err) {
+        localStorage.removeItem("token");
+        router.push("/signin");
+      }
     }
+
     getRoomInfo();
-  }, [token, allrooms]);
+  }, [token, allrooms, router]);
 
   if (!roomsData) return <div>Loading rooms...</div>;
   return (

@@ -1,17 +1,17 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 interface MessageType {
   _id: Schema.Types.ObjectId;
   message: string;
-  sentBy: Schema.Types.ObjectId;
-  roomId: Schema.Types.ObjectId;
+  sentBy: String;
+  roomName: String;
 }
 
 const messageSchema = new Schema<MessageType>(
   {
     message: String,
-    sentBy: { type: Schema.Types.ObjectId, ref: "user" },
-    roomId: { type: Schema.Types.ObjectId, ref: "room" },
+    sentBy: { type:String, ref: "user" },
+    roomName: { type: String, ref: "room" },
   },
   {
     timestamps: true,

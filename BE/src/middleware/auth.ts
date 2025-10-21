@@ -1,6 +1,5 @@
 import {Request,Response,NextFunction} from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { RoomModel } from '../models/roomModel';
 import { requiredInfo } from '../config/utils';
 import { getUserName } from '../models/userModel';
 
@@ -18,7 +17,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
   const decoded=jwt.verify(Token,requiredInfo.JWT_SECRET) as TokenType;
   if(!decoded){
     console.log("Not authorized");
-    return;
+    return 'expired';
   }
   const userName=await getUserName(decoded.id);
   if(!userName){
