@@ -28,6 +28,7 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
   const { token } = authcontext;
   const { socketRef } = socketcontext;
   const [activeChats,setActiveChats]=useState<ChatsType[]>([]);
+  const [prevChats,setprevChats]=useState<ChatsType[]>([]);
   const [message, setMessage] = useState("");
   const [isJoin, setisJoin] = useState(true);
   const [prevRoom,setPrevRoom]=useState('');
@@ -101,7 +102,7 @@ useEffect(() => {
         return;
       }
       const prevRoomMessages:ChatsType[]=messages?.data;
-      setActiveChats(prevRoomMessages);
+      setprevChats(prevRoomMessages);
     } catch (err) {
       console.error("Error fetching previous messages:", err);
     }
@@ -172,6 +173,17 @@ useEffect(() => {
         <div className="bg-gray-700 text-white px-4 py-2 rounded-lg self-end max-w-xs">
           Welcome to {roomName}!
         </div>
+        {
+          prevChats&& prevChats.map((chat:ChatsType,index)=>(
+            <div
+              className="bg-gray-700 flex flex-col text-white px-4 py-2 rounded-lg self-end max-w-xs"
+              key={`${chat.userName}-${index}`}
+            >
+              <p>Sent By:{chat.userName}</p>
+              <p>{chat.message}</p>
+            </div>
+          ))
+        }
         {activeChats ? (
           activeChats.map((chat: ChatsType, index) => (
             <div
