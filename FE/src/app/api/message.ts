@@ -21,9 +21,10 @@ export  async function getMessages({roomName,token}:messageType){
       }
     }
     );
+    console.log(response);
     return response.data;
     }catch(err){
-        console.log()
+        console.log();
     }
 }
 

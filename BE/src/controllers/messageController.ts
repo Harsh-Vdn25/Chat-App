@@ -7,8 +7,7 @@ export async function getMessages(req:Request,res:Response){
      const userName=(req as any).userName;
     try{
         const response=await messageModel.find({
-            roomName:roomName,
-            userName:userName
+            roomName:roomName
         })
         if(!response){
             res.json({message:"No messages"})
@@ -27,20 +26,23 @@ export async function saveMessages(req:Request,res:Response){
         messages,
         roomName
     }=req.body;
+    console.log(messages);
     try{
         if(!messages){
             return;
         }
-        const response=await messages.map(async (obj:{
+        const response=await Promise.all(
+            messages.map(async (obj:{
             message:string,
             userName:string
-        })=>(
-            await messageModel.create({
+        })=>{
+            return await messageModel.create({
             message:obj.message,
             roomName:roomName,
-            sentBy:obj.userName
+            userName:obj.userName
         })
-        ))
+        })
+        )
         console.log(response);
         if(!response){
             res.json({message:"No messages saved"})

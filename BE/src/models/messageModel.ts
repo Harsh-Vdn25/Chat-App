@@ -3,14 +3,14 @@ import mongoose, { Schema } from "mongoose";
 interface MessageType {
   _id: Schema.Types.ObjectId;
   message: string;
-  sentBy: String;
+  userName: String;
   roomName: String;
 }
 
 const messageSchema = new Schema<MessageType>(
   {
     message: String,
-    sentBy: { type:String, ref: "user" },
+    userName: { type:String, ref: "user" },
     roomName: { type: String, ref: "room" },
   },
   {
