@@ -31,7 +31,6 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
   const [prevChats,setprevChats]=useState<ChatsType[]>([]);
   const [message, setMessage] = useState("");
   const [isJoin, setisJoin] = useState(true);
-  const [prevRoom,setPrevRoom]=useState('');
 
   async function InitializeSocket(socketRef: RefObject<WebSocket | null>) {
     if (!socketRef.current) {

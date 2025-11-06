@@ -5,6 +5,7 @@ interface MessageType {
   message: string;
   userName: String;
   roomName: String;
+  timestamp:Number;
 }
 
 const messageSchema = new Schema<MessageType>(
@@ -12,9 +13,7 @@ const messageSchema = new Schema<MessageType>(
     message: String,
     userName: { type:String, ref: "user" },
     roomName: { type: String, ref: "room" },
-  },
-  {
-    timestamps: true,
+    timestamp:Number
   }
 );
 

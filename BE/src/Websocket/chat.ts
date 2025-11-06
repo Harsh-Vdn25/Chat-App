@@ -5,13 +5,11 @@ import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
 import { PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
 import { checkDuplicateSockets } from "./helpers/handleDuplicates";
 import { redisClients } from "../server";
-import { saveMessages } from "./helpers/saveMessage";
 
 export interface SocketArrType {
   socket: WebSocket;
   userName: string;
 }
-
 
 function getClients(roomName:string){
   const hash=roomName.split('').reduce((acc,k)=>acc+k.charCodeAt(0),0);
@@ -87,7 +85,7 @@ export const connectWebSocket = (server: Server) => {
           userSent,
           timestamp:Date.now()
         }
-        await redisClient?.lPush(roomName,JSON.stringify(payload));
+        await redisClient?.lPush("chat",JSON.stringify(payload));
 
           roomSockets.forEach((sObj) => {
             sObj.socket.send(
@@ -97,7 +95,6 @@ export const connectWebSocket = (server: Server) => {
               })
             );
           });
-          await saveMessages({roomName,message,userSent});
           return;
         } else {
           socket.send(JSON.stringify({ error: "Please join the room" }));

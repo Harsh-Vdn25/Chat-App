@@ -4,8 +4,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
-    "start": "node dist/server.js",
-    "dev": "npm run build && npm run start",
+    "start:server":"node dist/server.js",
+    "start:worker":"node dist/worker.js",
+    "dev": "npm run build && npm-run-all --parallel start:server start:worker",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
