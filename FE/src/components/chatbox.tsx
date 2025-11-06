@@ -82,19 +82,6 @@ export default function Chatbox({ roomName, setActiveRoom }: ChatboxProps) {
 useEffect(() => {
   const handleRoomChange = async () => {
     if (!roomName || !token) return;
-
-    if (prevRoom && activeChats.length > 0) {
-      try {
-        await saveMessages({ roomName: prevRoom, token, activeChats });
-        console.log("Messages saved successfully");
-        setActiveChats([]);
-      } catch (err) {
-        console.error("Error saving messages:", err);
-      }
-    } else {
-      setPrevRoom(roomName);
-    }
-
     try {
       const messages= await getMessages({ roomName, token });
 

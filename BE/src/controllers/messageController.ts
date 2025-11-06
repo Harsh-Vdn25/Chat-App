@@ -19,38 +19,3 @@ export async function getMessages(req:Request,res:Response){
 
     }
 }
-
-
-export async function saveMessages(req:Request,res:Response){
-    const {
-        messages,
-        roomName
-    }=req.body;
-    console.log(messages);
-    try{
-        if(!messages){
-            return;
-        }
-        const response=await Promise.all(
-            messages.map(async (obj:{
-            message:string,
-            userName:string
-        })=>{
-            return await messageModel.create({
-            message:obj.message,
-            roomName:roomName,
-            userName:obj.userName
-        })
-        })
-        )
-        console.log(response);
-        if(!response){
-            res.json({message:"No messages saved"})
-            return;
-        }
-        res.status(200).json({data:response});
-        return;
-    }catch(err){
-
-    }
-}

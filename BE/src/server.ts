@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'http';
-require("dotenv").config();
 import cors from 'cors';
+import { createClient } from 'redis';
 
 import { userRouter } from './Routes/userRoute';
 import { roomRouter } from './Routes/roomRoute';
@@ -19,6 +19,12 @@ const corsOptions={
 app.use(cors(corsOptions));
 app.use(express.json());
 
+export const redisClients=[
+  createClient({url:'redis://localhost:6379'}),
+  createClient({url:'redis://localhost:6380'})
+]
+
+
 //Routes
 app.use('/api/v1/user',userRouter)
 app.use('/api/v1/room',roomRouter);
@@ -35,10 +41,17 @@ if(isNaN(port)){
 }
 
 async function main(){
-    ConnectDB();
+    try{
+        for(const rc of redisClients){
+            await rc.connect();
+        }
+        await ConnectDB();
     server.listen(port,()=>{
         console.log(`Server is running on PORT ${port}`);
     })
+    }catch(err){
+        console.log("Failed to start the server");
+    }
 }
 
 main();
