@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Chatbox from "@/components/chatbox";
 import Button from "@/components/button";
 import CreateRoom from "@/components/CreateRoom";
+import joinRoom from "@/components/joinRoom";
 
 export default function Home() {
   const router = useRouter();
@@ -105,6 +106,19 @@ useEffect(() => {
               </div>
             </div>
           )}
+          {Join?(
+            <p>Hello</p>
+          ):(
+            <div className="flex h-screen bg-white justify-center items-center">
+              <div className="max-w-xl text-center text-gray-800 text-lg">
+                <p>
+                  This is a real-time chat application where users can join or
+                  create chat rooms to communicate with others.
+                </p>
+              </div>
+            </div>
+          )
+          }
         </div>
       )}
     </div>

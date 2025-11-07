@@ -6,7 +6,8 @@ import {
     getRoomInfo,
     getMyRooms,
     getChats,
-    createRoom
+    createRoom,
+    joinRoom
 } from '../controllers/roomController';
 
 import { verifyToken } from '../middleware/auth';
@@ -24,3 +25,5 @@ roomRouter.get('/chats/:roomId',verifyToken,checkRoom,getChats);
 roomRouter.post('/create',verifyToken,checkCreateRoomIP,createRoom);//check if room is already available 
 
 roomRouter.get('/myRooms',verifyToken,getMyRooms);
+
+roomRouter.post('/join',verifyToken,joinRoom);

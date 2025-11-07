@@ -5,7 +5,6 @@ const mongo_url:string=requiredInfo.MONGO_URL;
 
 export async function ConnectDB(){
     if(!mongo_url){
-        console.log("This is the url",mongo_url);
         process.exit(1);
     }
     try{

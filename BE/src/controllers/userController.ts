@@ -48,9 +48,9 @@ export const Signin = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const isValidated = await bcrypt.compare(password, UserData.password);
+    const isAuthorized = await bcrypt.compare(password, UserData.password);
     
-    if (!isValidated) {
+    if (!isAuthorized) {
       res.status(401).json({ message: "Wrong password" });
       return;
     }

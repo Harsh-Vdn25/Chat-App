@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { promise } from "zod";
 
 interface MessageType {
   _id: Schema.Types.ObjectId;
@@ -30,13 +31,15 @@ export async function saveMessages(batch:saveMessagesType[]){
     if(!batch)return;
     console.log("DB readyState before insert:", mongoose.connection.readyState);
     try{
-        const response=await messageModel.insertMany(
-             batch.map((mObj)=>({
-                userName:mObj.userSent,
+        const response=await Promise.all(
+           batch.map(async (mObj)=>{
+            await messageModel.insertOne({
+                  userName:mObj.userSent,
                 message:mObj.message,
                 roomName:mObj.roomName,
                 timestamp:mObj.timestamp
-             }))
+                })
+           })
         )
         console.log("saved",response);
         if(!response){

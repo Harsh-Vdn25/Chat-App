@@ -70,6 +70,15 @@ export async function getMyRooms(token:string) {
   }
 }
 
+type joinRoomType=Pick<createRoomReqType,'password'|'token'|'roomName'>;
+export async function roomJoin({roomName,password,token}:joinRoomType){
+  try{
+    await api.post
+  }catch(err){
+
+  }
+}
+
 export const getToken=()=>{
   const clientToken=localStorage.getItem('Token');
   return clientToken;
