@@ -4,7 +4,7 @@ import { CheckRequest, decodeToken } from "./helpers/checks";
 import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
 import { PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
 import { checkDuplicateSockets } from "./helpers/handleDuplicates";
-import { redisClients } from "../server";
+import { redisClients } from "../config/redisClients";
 
 export interface SocketArrType {
   socket: WebSocket;
@@ -106,18 +106,18 @@ export const connectWebSocket = (server: Server) => {
         const {roomName,token}=parsed.data;
         const JoiningRoom=allSockets.get(roomName);
         let check;
-        const keys=allSockets.keys();
-        keys.forEach((room) => {
-          check=allSockets.get(room)?.find(sArr=>sArr.socket===socket);
-          if(check){
-            const newSocketArr=allSockets.get(room)?.filter(sArr=>sArr.socket!==socket);
-            if(!newSocketArr){
-              allSockets.delete(room);
-              return;
-            }
-            allSockets.set(room,newSocketArr);
+        for (const room of allSockets.keys()) {
+        const check = allSockets.get(room)?.find(sArr => sArr.socket === socket);
+        if (check) {
+          const newSocketArr = allSockets.get(room)?.filter(sArr => sArr.socket !== socket);
+          if (!newSocketArr || newSocketArr.length === 0) {
+            allSockets.delete(room);
+            continue;
           }
-        });
+          allSockets.set(room, newSocketArr);
+        }
+      }
+
         const userName=await decodeToken(token,socket);
         if(!userName){
           return;

@@ -9,7 +9,7 @@ import { ConnectDB } from './config/db';
 import { requiredInfo } from './config/utils';
 import { connectWebSocket } from './Websocket/chat';
 import { messageRouter } from './Routes/messageRoute';
-
+import { redisClients } from './config/redisClients';
 
 const app=express();
 const corsOptions={
@@ -19,10 +19,6 @@ const corsOptions={
 app.use(cors(corsOptions));
 app.use(express.json());
 
-export const redisClients=[
-  createClient({url:'redis://localhost:6379'}),
-  createClient({url:'redis://localhost:6380'})
-]
 
 
 //Routes
