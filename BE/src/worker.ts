@@ -1,8 +1,6 @@
-import { saveMessages } from "./Websocket/helpers/saveMessage";
 import { createClient } from "redis";
 import { allSockets } from "./Websocket/chat";
-import {type saveMessagesType } from "./Websocket/helpers/saveMessage";
-
+import { saveMessages,type saveMessagesType } from "./models/messageModel";
 const redisClient=createClient({url:"redis://localhost:6379"});
 
 async function startWorker(){
@@ -14,7 +12,7 @@ async function startWorker(){
     if(result){
             const val = result.element;
             const messageObj = JSON.parse(val);
-            batch.push();
+            batch.push(messageObj);
             const roomInfo=allSockets.get(messageObj.roomName);
             if(roomInfo){
                 roomInfo.map((x)=>{

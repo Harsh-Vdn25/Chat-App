@@ -38,10 +38,10 @@ if(isNaN(port)){
 
 async function main(){
     try{
+        await ConnectDB();
         for(const rc of redisClients){
             await rc.connect();
         }
-        await ConnectDB();
     server.listen(port,()=>{
         console.log(`Server is running on PORT ${port}`);
     })

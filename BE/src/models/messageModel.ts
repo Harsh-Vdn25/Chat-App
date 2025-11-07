@@ -18,3 +18,32 @@ const messageSchema = new Schema<MessageType>(
 );
 
 export const messageModel = mongoose.model("message", messageSchema);
+
+export interface saveMessagesType{
+    message:string;
+    roomName:string;
+    userSent:string;
+    timestamp:Number;
+}
+
+export async function saveMessages(batch:saveMessagesType[]){
+    if(!batch)return;
+    console.log("DB readyState before insert:", mongoose.connection.readyState);
+    try{
+        const response=await messageModel.insertMany(
+             batch.map((mObj)=>({
+                userName:mObj.userSent,
+                message:mObj.message,
+                roomName:mObj.roomName,
+                timestamp:mObj.timestamp
+             }))
+        )
+        console.log("saved",response);
+        if(!response){
+            return false;
+        }
+        return true;
+    }catch(err){
+        console.log(err);
+    }
+}
