@@ -4,17 +4,13 @@ import { CheckRequest, decodeToken } from "./helpers/checks";
 import { checkIpRequest, joinType, chatType } from "./helpers/inputValidate";
 import { PrivateRoomCheck } from "./helpers/RoomCheckAndEntry";
 import { checkDuplicateSockets } from "./helpers/handleDuplicates";
-import { redisClients } from "../config/redisClients";
+import { redisClient } from "../config/redisClients";
 
 export interface SocketArrType {
   socket: WebSocket;
   userName: string;
 }
 
-function getClients(roomName:string){
-  const hash=roomName.split('').reduce((acc,k)=>acc+k.charCodeAt(0),0);
-  return redisClients[hash%redisClients.length];
-}
 
 export const allSockets = new Map<string, SocketArrType[]>();
 
@@ -78,15 +74,13 @@ export const connectWebSocket = (server: Server) => {
             (sObj) => sObj.socket === socket
           )?.userName;
           if(!userSent)return;
-          const redisClient=getClients(roomName);
           const payload={
           roomName,
           message,
           userSent,
           timestamp:Date.now()
-        }
-        await redisClient?.lPush("chat",JSON.stringify(payload));
-
+        };
+        await redisClient.publish("MESSAGES",JSON.stringify(payload));
           roomSockets.forEach((sObj) => {
             sObj.socket.send(
               JSON.stringify({

@@ -73,9 +73,15 @@ export async function getMyRooms(token:string) {
 type joinRoomType=Pick<createRoomReqType,'password'|'token'|'roomName'>;
 export async function roomJoin({roomName,password,token}:joinRoomType){
   try{
-    await api.post
+    const response=await api.post('/room/join',{
+      headers:{
+        Authorization:`Bearer ${token}`,
+      },
+    })
+    console.log(response.data)
+    return response;
   }catch(err){
-
+    console.log(err);
   }
 }
 

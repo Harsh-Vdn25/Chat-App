@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { promise } from "zod";
 
 interface MessageType {
   _id: Schema.Types.ObjectId;

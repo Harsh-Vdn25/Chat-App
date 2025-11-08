@@ -1,7 +1,6 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
-import { createClient } from 'redis';
 
 import { userRouter } from './Routes/userRoute';
 import { roomRouter } from './Routes/roomRoute';
@@ -9,7 +8,8 @@ import { ConnectDB } from './config/db';
 import { requiredInfo } from './config/utils';
 import { connectWebSocket } from './Websocket/chat';
 import { messageRouter } from './Routes/messageRoute';
-import { redisClients } from './config/redisClients';
+import { redisClient } from './config/redisClients';
+import { startWorker } from './worker';
 
 const app=express();
 const corsOptions={
@@ -39,12 +39,11 @@ if(isNaN(port)){
 async function main(){
     try{
         await ConnectDB();
-        for(const rc of redisClients){
-            await rc.connect();
-        }
+        await redisClient.connect();
     server.listen(port,()=>{
         console.log(`Server is running on PORT ${port}`);
     })
+    startWorker();
     }catch(err){
         console.log("Failed to start the server");
     }
