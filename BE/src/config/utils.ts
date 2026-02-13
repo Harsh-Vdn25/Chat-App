@@ -7,6 +7,7 @@ dotenv.config();
 interface ConfigType{
     PORT:string;
     MONGO_URL:string;
+    REDIS_URL:string;
     JWT_SECRET:string;
     SALT_ROUNDS:string;
 }
@@ -24,6 +25,7 @@ const getRequired=(input:string):string=>{
 
 export const requiredInfo:ConfigType={
     PORT:getRequired('PORT'),
+    REDIS_URL:getRequired('REDIS_URL'),
     MONGO_URL:getRequired('MONGO_URL'),
     JWT_SECRET:getRequired('JWT_SECRET'),
     SALT_ROUNDS:getRequired('SALT_ROUNDS'),

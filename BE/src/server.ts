@@ -10,7 +10,6 @@ import { connectWebSocket } from './Websocket/chat';
 import { messageRouter } from './Routes/messageRoute';
 import { redisClient } from './config/redisClients';
 import { startWorker } from './worker';
-
 const app=express();
 const corsOptions={
     origin:"http://localhost:3000"
@@ -45,7 +44,7 @@ async function main(){
     })
     startWorker();
     }catch(err){
-        console.log("Failed to start the server");
+        console.log("Failed to start the server",err);
     }
 }
 
